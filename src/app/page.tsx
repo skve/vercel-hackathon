@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { getAirportRecommendations } from "./actions";
 import { AirportInfo, FlightState } from "./types/aviation";
 import { AirportRecommendation } from "./components/AirportRecommendation";
@@ -10,7 +10,7 @@ import {
   ShadowIcon,
 } from "@radix-ui/react-icons";
 
-const flightState: FlightState = {
+const INITIAL_FLIGHT_STATE: FlightState = {
   currentPosition: { latitude: 40.7128, longitude: -74.006 }, // New York City coordinates
   remainingFuel: 20000, // in kg
   airplaneModel: {
@@ -20,9 +20,38 @@ const flightState: FlightState = {
   },
 };
 
+// Fuel burn rate of ~6000 kg/hour * 5x speed = ~8.33 kg/second
+const FUEL_BURN_RATE = 8.33;
+// Moving at ~900 km/h * 5x speed = ~1.25 km/second
+const SPEED_KM_PER_SEC = 1.25;
+
 export default function Home() {
   const [recommendations, setRecommendations] = useState<AirportInfo[]>([]);
   const [pending, startTransition] = useTransition();
+  const [flightState, setFlightState] = useState<FlightState>(INITIAL_FLIGHT_STATE);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFlightState(prev => {
+        // Calculate new fuel level
+        const newFuel = Math.max(0, prev.remainingFuel - FUEL_BURN_RATE);
+        
+        // Move position eastward (adjust longitude)
+        const newLongitude = prev.currentPosition.longitude + (SPEED_KM_PER_SEC / 111.32); // roughly convert km to degrees
+        
+        return {
+          ...prev,
+          remainingFuel: newFuel,
+          currentPosition: {
+            ...prev.currentPosition,
+            longitude: newLongitude
+          }
+        };
+      });
+    }, 1000); // Update every second
+
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchRecommendations = async () => {
     const airports = await getAirportRecommendations(flightState);
