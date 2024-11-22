@@ -65,7 +65,7 @@ export default function Home() {
             </dl>
           </div>
 
-          <div>
+          <div className="border-t border-sand-5 -mx-6 p-3">
             <button
               disabled={pending}
               onClick={() => startTransition(fetchRecommendations)}
@@ -76,7 +76,7 @@ export default function Home() {
               ) : (
                 <SewingPinIcon className="size-4" />
               )}
-              Find Airports
+              Calculate Diversion
             </button>
           </div>
         </aside>

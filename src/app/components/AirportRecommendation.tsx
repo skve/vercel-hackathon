@@ -9,12 +9,13 @@ export function AirportRecommendation({
 }) {
   return (
     <div className="bg-sand-1 border border-sand-5  rounded-2xl  p-6 mb-4">
-      <h2 className="text-2xl font-semibold mb-2">
+      <h2 className="text-2xl tracking-tight font-medium mb-2">
         {airport.name} ({airport.icao})
       </h2>
 
-      <p className="text-lg text-sand-11 mb-4">
-        Distance: {airport.distance.toFixed(2)} NM
+      <p className="text-base text-sand-11 flex gap-2 items-center mb-4">
+        <span className="font-medium">Distance</span>{" "}
+        <span className="text-grass-9 bg-grass-2 border border-grass-6 rounded-md px-2 py-0.5 font-mono">{airport.distance.toFixed(2)}nm</span>
       </p>
 
       {airport.analysis && (
