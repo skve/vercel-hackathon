@@ -20,7 +20,8 @@ export async function analyzeAirportData(
   metar: string,
   notams: string[],
   flightState: FlightState,
-  eta: Date
+  eta: Date,
+  needsAtLeastOne: boolean = false
 ) {
   const response = await generateObject({
     model: openai("gpt-4o-2024-11-20", {
@@ -31,6 +32,12 @@ export async function analyzeAirportData(
     schemaDescription:
       "A safety-focused analysis of an airport's suitability as a diversion option",
     prompt: `You are an aviation safety expert analyzing diversion airport options.
+
+    ${
+      needsAtLeastOne
+        ? "You must return at least one recommended airport. State in your summary if you were forced to chose at least one out of bad options."
+        : ""
+    }
     
           TASK:
           Evaluate the following airport data for ${eta.toISOString()} as a potential diversion option.
