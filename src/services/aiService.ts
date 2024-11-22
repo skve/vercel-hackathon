@@ -29,26 +29,40 @@ export async function analyzeAirportData(
     schema: AirportAnalysisSchema,
     schemaName: "AirportAnalysis",
     schemaDescription:
-      "An analysis of an airport's suitability as a diversion option",
-    prompt: `
-      Analyze the following METAR and NOTAMs for an airport with an estimated time of arrival of ${eta.toISOString()}:
-
-      METAR: ${metar}
-
-      NOTAMs:
-      ${notams.join("\n")}
-
-      Note, you must take into account the current flight state and the aircraft's capabilities.
-      Aircraft: ${flightState.airplaneModel.type}
-      Remaining Fuel: ${flightState.remainingFuel.toLocaleString()} kg
-      Range: ${flightState.airplaneModel.range.toLocaleString()} km remaining
-      Current Position: ${flightState.currentPosition.latitude.toFixed(4)}°N, ${flightState.currentPosition.longitude.toFixed(4)}°W     
-
-      Provide a brief 1-2 sentence summary of the airport's suitability as a diversion option. 
-      Then, list any positive notes and negative derogations. 
-      If there are any conditions that make this airport unsafe as a diversion option, clearly state that it is not recommended. 
-      Be conservative in your assessment.
-    `,
+      "A safety-focused analysis of an airport's suitability as a diversion option",
+    prompt: `You are an aviation safety expert analyzing diversion airport options.
+    
+          TASK:
+          Evaluate the following airport data for ${eta.toISOString()} as a potential diversion option.
+          
+          CRITICAL SAFETY PARAMETERS:
+          1. Aircraft Type: ${flightState.airplaneModel.type}
+          2. Fuel Status: ${flightState.remainingFuel.toLocaleString()} kg
+          3. Range Capability: ${flightState.airplaneModel.range.toLocaleString()} km remaining
+          4. Current Position: ${flightState.currentPosition.latitude.toFixed(
+            4
+          )}°N, ${flightState.currentPosition.longitude.toFixed(4)}°W
+    
+          WEATHER CONDITIONS:
+          ${metar}
+    
+          OPERATIONAL RESTRICTIONS:
+          ${notams.join("\n")}
+    
+          REQUIRED OUTPUT FORMAT:
+          1. summary: Concise 1-2 sentence evaluation focusing on safety-critical factors
+          2. notes: List all positive factors supporting this as a diversion option
+          3. derogations: List all safety concerns, restrictions, or limitations
+          4. isRecommended: Set false if ANY safety criteria are not met (weather minimums, fuel reserves, runway requirements, or operational restrictions)
+    
+          EVALUATION CRITERIA:
+          - Weather must meet aircraft minimums with adequate safety margins
+          - Runway length/width must be sufficient for aircraft type
+          - Fuel reserves must allow for approach and go-around
+          - All critical airport systems must be operational
+          - NOTAMs must not restrict safe operations
+    
+          Be conservative in your assessment. When in doubt, prioritize safety.`,
   });
 
   return response;
