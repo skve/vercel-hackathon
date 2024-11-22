@@ -1,3 +1,4 @@
+import { FlightState } from "@/app/types/aviation";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod";
@@ -18,6 +19,7 @@ const AirportAnalysisSchema = z.object({
 export async function analyzeAirportData(
   metar: string,
   notams: string[],
+  flightState: FlightState,
   eta: Date
 ) {
   const response = await generateObject({
@@ -36,9 +38,16 @@ export async function analyzeAirportData(
       NOTAMs:
       ${notams.join("\n")}
 
+      Note, you must take into account the current flight state and the aircraft's capabilities.
+      Aircraft: ${flightState.airplaneModel.type}
+      Remaining Fuel: ${flightState.remainingFuel.toLocaleString()} kg
+      Range: ${flightState.airplaneModel.range.toLocaleString()} km remaining
+      Current Position: ${flightState.currentPosition.latitude.toFixed(4)}°N, ${flightState.currentPosition.longitude.toFixed(4)}°W     
+
       Provide a brief 1-2 sentence summary of the airport's suitability as a diversion option. 
       Then, list any positive notes and negative derogations. 
-      If there are any conditions that make this airport unsafe as a diversion option, clearly state that it is not recommended.
+      If there are any conditions that make this airport unsafe as a diversion option, clearly state that it is not recommended. 
+      Be conservative in your assessment.
     `,
   });
 
