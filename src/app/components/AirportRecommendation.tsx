@@ -63,8 +63,8 @@ export function AirportRecommendation({
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <MetarDisplay metar={airport.metar} />
-        <NotamDisplay notams={airport.notams} />
+        <MetarDisplay metar={airport.metar} isRecommended={airport.analysis?.isRecommended ?? false} />
+        <NotamDisplay notams={airport.notams} isRecommended={airport.analysis?.isRecommended ?? false} />
       </div>
     </div>
   );

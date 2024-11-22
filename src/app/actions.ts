@@ -10,7 +10,7 @@ export async function getAirportRecommendations(flightState: FlightState): Promi
   
   const analyzedAirports = await Promise.all(airports.map(async (airport) => {
     const eta = new Date(Date.now() + 3600000); // Assuming 1 hour ETA for simplicity
-    const analysisResponse = await analyzeAirportData(airport.metar.raw, airport.notams.map(n => n.text), eta);
+    const analysisResponse = await analyzeAirportData(airport.metar.raw, airport.notams.map(n => n.text), flightState, eta);
     const analysis = analysisResponse.object;
       
     return {
@@ -21,7 +21,6 @@ export async function getAirportRecommendations(flightState: FlightState): Promi
   }));
   
   return analyzedAirports
-    .filter(airport => airport.analysis.isRecommended)
     .sort((a, b) => {
       const aScore = a.distance + (a.analysis.derogations.length * 10);
       const bScore = b.distance + (b.analysis.derogations.length * 10);
