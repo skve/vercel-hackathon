@@ -1,4 +1,4 @@
-import { AirportInfo, Coordinates } from '../types/aviation';
+import { AirportInfo, Coordinates } from '../app/types/aviation';
 
 export async function fetchSurroundingAirports(position: Coordinates): Promise<AirportInfo[]> {
   // This would typically be an API call. For now, we'll return mock data.

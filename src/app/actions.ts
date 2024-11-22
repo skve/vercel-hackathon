@@ -1,26 +1,30 @@
 'use server'
 
 import { fetchSurroundingAirports } from '../services/aviationApi';
+import { analyzeAirportData } from '../services/aiService';
+import { AirportInfo,  FlightState } from './types/aviation';
 import { calculateDistance } from '../utils/distance';
-import { AirportInfo, FlightState } from '../types/aviation';
 
 export async function getAirportRecommendations(flightState: FlightState): Promise<AirportInfo[]> {
   const airports = await fetchSurroundingAirports(flightState.currentPosition);
   
-  // Filter and sort airports based on various factors
-  return airports
-    .map(airport => ({
+  const analyzedAirports = await Promise.all(airports.map(async (airport) => {
+    const eta = new Date(Date.now() + 3600000); // Assuming 1 hour ETA for simplicity
+    const analysisResponse = await analyzeAirportData(airport.metar.raw, airport.notams.map(n => n.text), eta);
+    const analysis = analysisResponse.object;
+      
+    return {
       ...airport,
       distance: calculateDistance(flightState.currentPosition, airport.coordinates),
-    }))
-    .filter(airport => 
-      airport.distance <= flightState.airplaneModel.range &&
-      !airport.notams.some(notam => notam.text.includes('CLSD')) // Filter out closed airports
-    )
+      analysis
+    };
+  }));
+  
+  return analyzedAirports
+    .filter(airport => airport.analysis.isRecommended)
     .sort((a, b) => {
-      // Sort by a combination of distance and weather conditions
-      const aScore = a.distance + (a.metar.weatherConditions.length * 10);
-      const bScore = b.distance + (b.metar.weatherConditions.length * 10);
+      const aScore = a.distance + (a.analysis.derogations.length * 10);
+      const bScore = b.distance + (b.analysis.derogations.length * 10);
       return aScore - bScore;
     });
 }

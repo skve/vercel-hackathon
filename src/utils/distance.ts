@@ -1,4 +1,4 @@
-import { Coordinates } from '../types/aviation';
+import { Coordinates } from '../app/types/aviation';
 
 export function calculateDistance(coord1: Coordinates, coord2: Coordinates): number {
   const R = 6371; // Earth's radius in km
